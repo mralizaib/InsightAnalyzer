@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ByteIT Security Platform{% endblock %}</title>
+    <!-- Bootstrap CSS from Replit theme -->
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body {% if current_user.is_authenticated %}data-user-id="{{ current_user.id }}"{% endif %}>
+    {% if current_user.is_authenticated %}
+        <!-- Main layout for authenticated users -->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar Navigation -->
+                <div class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse" style="min-height: 100vh;">
+                    <div class="d-flex flex-column p-3 text-white">
+                        <a href="{{ url_for('dashboard.index') }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                            <img src="{{ url_for('static', filename='css/byteit-logo.jpg') }}" alt="ByteIT" class="byteit-logo byteit-logo-sidebar me-2">
+                            <span class="fs-4">ByteIT</span>
+                        </a>
+
+                        <!-- Real-time clock -->
+                        <div class="text-center my-3">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <i class="fas fa-clock me-2"></i>
+                                <span id="live-clock" class="text-light fs-5">00:00:00</span>
+                            </div>
+                            <div id="live-date" class="text-light-emphasis small mt-1"></div>
+                        </div>
+                        <hr>
+                        <ul class="nav nav-pills flex-column mb-auto">
+                            <li class="nav-item">
+                                <a href="{{ url_for('dashboard.index') }}" class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ url_for('alerts.index') }}" class="nav-link {% if request.endpoint == 'alerts.index' %}active{% endif %}">
+                                    <i class="fas fa-bell me-2"></i>
+                                    Alerts
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ url_for('insights.index') }}" class="nav-link {% if request.endpoint == 'insights.index' %}active{% endif %}">
+                                    <i class="fas fa-brain me-2"></i>
+                                    AI Insights
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ url_for('reports.index') }}" class="nav-link {% if request.endpoint == 'reports.index' %}active{% endif %}">
+                                    <i class="fas fa-file-alt me-2"></i>
+                                    Reports
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ url_for('retention.index') }}" class="nav-link {% if request.endpoint == 'retention.index' %}active{% endif %}">
+                                    <i class="fas fa-database me-2"></i>
+                                    Data Retention
+                                </a>
+                            </li>
+                            {% if current_user.is_admin() %}
+                            <li class="nav-item">
+                                <a href="{{ url_for('users.index') }}" class="nav-link {% if request.endpoint == 'users.index' %}active{% endif %}">
+                                    <i class="fas fa-users me-2"></i>
+                                    User Management
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ url_for('admin.scheduler_management') }}" class="nav-link {% if request.endpoint == 'admin.scheduler_management' %}active{% endif %}">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Scheduled Tasks
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                        <hr>
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-2 fs-5"></i>
+                                <strong>{{ current_user.username }}</strong>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                                <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Sign out</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main content area -->
+                <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                    <!-- Flash messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Main content -->
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Simple layout for non-authenticated users -->
+        <div class="container py-5">
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block auth_content %}{% endblock %}
+        </div>
+    {% endif %}
+
+    <!-- Common modals -->
+    <!-- Loading modal -->
+    <div class="modal fade" id="loading-modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5">
+                    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5>Processing...</h5>
+                    <p class="text-muted">Please wait while we process your request.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success modal -->
+    <div class="modal fade" id="success-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Success</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="success-message">Operation completed successfully.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error modal -->
+    <div class="modal fade" id="error-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="error-message">An error occurred while processing your request.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Command Confirmation Modal -->
+    <div class="modal fade" id="voice-confirm-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-microphone me-2"></i>Confirm Command</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="voice-confirm-message">Are you sure you want to execute this command?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="voice-confirm-no">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="voice-confirm-yes">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <!-- AI Assistant Interface -->
+    <div id="ai-assistant" class="ai-assistant">
+        <!-- Floating Assistant Button -->
+        <button id="assistant-toggle" class="assistant-toggle-btn" title="AI Assistant">
+            <i class="fas fa-robot"></i>
+        </button>
+        
+        <!-- Assistant Chat Panel -->
+        <div id="assistant-panel" class="assistant-panel">
+            <div class="assistant-header">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-robot me-2"></i>
+                    <span class="fw-bold">AI Security Assistant</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button id="voice-mode-btn" class="btn btn-sm btn-outline-light" title="Toggle Voice Mode">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button type="button" class="btn-close btn-close-white btn-sm" onclick="toggleAssistant()"></button>
+                </div>
+            </div>
+            
+            <div class="assistant-messages" id="assistant-messages">
+                <div class="message assistant-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>Hello! I'm your AI Security Assistant. I can help you with:</p>
+                        <ul class="mb-0">
+                            <li>Analyzing security alerts</li>
+                            <li>Getting dashboard statistics</li>
+                            <li>Navigating the platform</li>
+                            <li>Generating insights and reports</li>
+                        </ul>
+                        <p class="mt-2 mb-0"><small>How can I help you today?</small></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="assistant-input-area">
+                <div id="voice-indicator" class="voice-indicator" style="display: none;">
+                    <div class="voice-waves">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                    <span class="voice-status">Listening...</span>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="assistant-input" class="form-control" placeholder="Ask me anything..." autocomplete="off">
+                    <button id="voice-btn" class="btn btn-outline-secondary" title="Voice Input">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button id="send-btn" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .ai-assistant {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+        
+        .assistant-toggle-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .assistant-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .assistant-toggle-btn.active {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        }
+        
+        .assistant-panel {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 380px;
+            height: 500px;
+            background: #1a1a2e;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .assistant-panel.show {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .assistant-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        
+        .assistant-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            display: flex;
+            gap: 10px;
+            max-width: 90%;
+        }
+        
+        .assistant-message {
+            align-self: flex-start;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .assistant-message .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .user-message .message-avatar {
+            background: #4a5568;
+            color: white;
+        }
+        
+        .message-content {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 12px;
+            color: #e0e0e0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .user-message .message-content {
+            background: #667eea;
+            color: white;
+        }
+        
+        .message-content p {
+            margin-bottom: 8px;
+        }
+        
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .message-content ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+        
+        .message-content ul li {
+            margin-bottom: 4px;
+        }
+        
+        .assistant-input-area {
+            padding: 15px;
+            border-top: 1px solid #2d3748;
+            background: #1a1a2e;
+        }
+        
+        .assistant-input-area .input-group {
+            background: #16213e;
+            border-radius: 25px;
+            overflow: hidden;
+        }
+        
+        .assistant-input-area .form-control {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 12px 15px;
+        }
+        
+        .assistant-input-area .form-control:focus {
+            background: transparent;
+            box-shadow: none;
+        }
+        
+        .assistant-input-area .form-control::placeholder {
+            color: #718096;
+        }
+        
+        .assistant-input-area .btn {
+            border: none;
+            padding: 12px 15px;
+        }
+        
+        .assistant-input-area #send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .assistant-input-area #voice-btn {
+            color: #a0aec0;
+        }
+        
+        .assistant-input-area #voice-btn:hover {
+            color: #667eea;
+        }
+        
+        .assistant-input-area #voice-btn.listening {
+            color: #f5576c;
+            animation: pulse-voice 1.5s infinite;
+        }
+        
+        @keyframes pulse-voice {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .voice-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+        }
+        
+        .voice-waves {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            height: 20px;
+        }
+        
+        .voice-waves span {
+            width: 3px;
+            background: #667eea;
+            border-radius: 2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+        
+        .voice-waves span:nth-child(1) { height: 8px; animation-delay: 0s; }
+        .voice-waves span:nth-child(2) { height: 16px; animation-delay: 0.1s; }
+        .voice-waves span:nth-child(3) { height: 20px; animation-delay: 0.2s; }
+        .voice-waves span:nth-child(4) { height: 16px; animation-delay: 0.3s; }
+        .voice-waves span:nth-child(5) { height: 8px; animation-delay: 0.4s; }
+        
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1); }
+        }
+        
+        .voice-status {
+            color: #667eea;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px 12px;
+        }
+        
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+    </style>
+    {% endif %}
+
+    <!-- Bootstrap and core JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Real-time clock script -->
+    {% if current_user.is_authenticated %}
+    <script>
+    function updateClock() {
+        const now = new Date();
+
+        // Format time: HH:MM:SS
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const timeString = `${hours}:${minutes}:${seconds}`;
+
+        // Format date: Day, Month Date, Year
+        const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+        const dateString = now.toLocaleDateString('en-US', options);
+
+        // Update DOM elements
+        document.getElementById('live-clock').textContent = timeString;
+        document.getElementById('live-date').textContent = dateString;
+    }
+
+    // Initial update
+    updateClock();
+
+    // Update clock every second
+    setInterval(updateClock, 1000);
+    </script>
+    {% endif %}
+
+    <!-- Auto-logout functionality -->
+    <script>
+        let idleTimer;
+        let idleTime = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+        function resetIdleTimer() {
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(function() {
+                alert('Session expired due to inactivity. You will be logged out.');
+                window.location.href = '{{ url_for("auth.logout") }}';
+            }, idleTime);
+        }
+
+        // Reset timer on user activity
+        document.addEventListener('mousemove', resetIdleTimer);
+        document.addEventListener('keypress', resetIdleTimer);
+        document.addEventListener('click', resetIdleTimer);
+        document.addEventListener('scroll', resetIdleTimer);
+
+        // Initialize timer
+        resetIdleTimer();
+    </script>
+
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    {% if current_user.is_authenticated %}
+    <script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+    {% endif %}
+    {% block scripts %}{% endblock %}
+</body>
+</html>
