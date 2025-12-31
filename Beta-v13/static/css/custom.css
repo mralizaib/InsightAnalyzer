@@ -1,0 +1,192 @@
+/* Custom styles for AZ Sentinel X */
+
+/* Alert severity colors */
+.severity-critical {
+    color: #dc3545 !important;
+}
+
+.severity-high {
+    color: #fd7e14 !important;
+}
+
+.severity-medium {
+    color: #ffc107 !important;
+}
+
+.severity-low {
+    color: #28a745;
+}
+
+.bg-severity-low {
+    background-color: #28a745 !important;
+}
+
+.severity-fim {
+    color: #17a2b8;
+}
+
+.bg-severity-fim {
+    background-color: #17a2b8 !important;
+}
+
+/* Custom card styles */
+.stat-card {
+    border-left: 5px solid var(--bs-primary);
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card.critical {
+    border-left-color: var(--bs-danger);
+}
+
+.stat-card.high {
+    border-left-color: var(--bs-warning);
+}
+
+.stat-card.medium {
+    border-left-color: var(--bs-info);
+}
+
+.stat-card.low {
+    border-left-color: var(--bs-secondary);
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--bs-primary);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* AI Insights section */
+.insight-result {
+    border-left: 4px solid var(--bs-primary);
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.insight-question {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.insight-answer {
+    background-color: rgba(33, 37, 41, 0.05);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Star rating */
+.rating {
+    display: inline-block;
+    unicode-bidi: bidi-override;
+    color: #ddd;
+    font-size: 25px;
+    height: 25px;
+    width: auto;
+    margin: 0;
+    position: relative;
+    padding: 0;
+}
+
+.rating-upper {
+    color: #ffc107;
+    padding: 0;
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+}
+
+.rating-lower {
+    padding: 0;
+    display: flex;
+    z-index: 0;
+}
+
+/* Dashboard timeline chart */
+.timeline-chart-container {
+    height: 300px;
+    width: 100%;
+}
+
+/* Custom sidebar active link */
+.nav-pills .nav-link.active {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: var(--bs-primary);
+    border-left: 3px solid var(--bs-primary);
+}
+
+/* Custom table styling */
+.alert-table th {
+    position: sticky;
+    top: 0;
+    background-color: var(--bs-dark);
+    z-index: 1;
+}
+
+/* ByteIT Logo Styling */
+.byteit-logo {
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.byteit-logo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+}
+
+.byteit-logo-sidebar {
+    width: 40px;
+    height: 40px;
+}
+
+.byteit-logo-login {
+    width: 50px;
+    height: 50px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Hide voice assistant button */
+#voice-assistant-btn {
+    display: none !important;
+}
