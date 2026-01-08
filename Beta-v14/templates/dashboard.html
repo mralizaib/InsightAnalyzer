@@ -1,0 +1,467 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - ByteIT Security Platform{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-chart-line me-2"></i>Wazuh Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-btn">
+                <i class="fas fa-sync-alt me-1"></i> Refresh
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Count Cards -->
+<div class="row g-3 mb-4" id="dashboard-stats">
+    <div class="col-md-6 col-xl-3">
+        <div class="card stat-card critical h-100 clickable-card" data-severity="critical" style="cursor: pointer;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-0">Critical</h6>
+                        <h2 class="my-2 severity-critical" id="critical-count">--</h2>
+                    </div>
+                    <div class="bg-danger bg-opacity-10 p-2 rounded">
+                        <i class="fas fa-exclamation-triangle fs-3 severity-critical"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-xl-3">
+        <div class="card stat-card high h-100 clickable-card" data-severity="high" style="cursor: pointer;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-0">High Alerts</h6>
+                        <h2 class="my-2 severity-high" id="high-count">--</h2>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 p-2 rounded">
+                        <i class="fas fa-exclamation-circle fs-3 severity-high"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-xl-2">
+        <div class="card stat-card medium h-100 clickable-card" data-severity="medium" style="cursor: pointer;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-0">Medium</h6>
+                        <h2 class="my-2 severity-medium" id="medium-count">--</h2>
+                    </div>
+                    <div class="bg-info bg-opacity-10 p-2 rounded">
+                        <i class="fas fa-info-circle fs-3 severity-medium"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-xl-2">
+        <div class="card stat-card low h-100 clickable-card" data-severity="low" style="cursor: pointer;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-0">Low Alerts</h6>
+                        <h2 class="my-2 severity-low" id="low-count">--</h2>
+                    </div>
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded">
+                        <i class="fas fa-comment-dots fs-3 severity-low"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-2">
+        <div class="card stat-card events h-100 clickable-card" data-severity="events" style="cursor: pointer; border-left: 4px solid #0dcaf0;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-0">Misc Events</h6>
+                        <h2 class="my-2 text-info" id="events-count">--</h2>
+                    </div>
+                    <div class="bg-info bg-opacity-10 p-2 rounded">
+                        <i class="fas fa-stream fs-3 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Agent Status Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-0">Total Agents</h6>
+                        <h2 class="my-2" id="total-agents">--</h2>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 p-3 rounded">
+                        <i class="fas fa-laptop fs-1 text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-0">Active Agents</h6>
+                        <h2 class="my-2 text-success" id="active-agents">--</h2>
+                    </div>
+                    <div class="bg-success bg-opacity-10 p-3 rounded">
+                        <i class="fas fa-check-circle fs-1 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-muted mb-0">Disconnected Agents</h6>
+                        <h2 class="my-2 text-danger" id="disconnected-agents">--</h2>
+                    </div>
+                    <div class="bg-danger bg-opacity-10 p-3 rounded">
+                        <i class="fas fa-times-circle fs-1 text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alerts Timeline Chart -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-chart-area me-2"></i>Alerts Timeline</h5>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-outline-secondary timeline-range active" data-days="1">24h</button>
+                    <button type="button" class="btn btn-outline-secondary timeline-range" data-days="7">7d</button>
+                    <button type="button" class="btn btn-outline-secondary timeline-range" data-days="30">30d</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="alerts-timeline-chart" class="timeline-chart-container">
+                    <!-- Chart will be rendered here -->
+                    <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- High Severity Threat Analysis -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>High Severity by Threat Type</h5>
+            </div>
+            <div class="card-body">
+                <div id="threat-types-chart" style="height: 300px;">
+                    <!-- Chart will be rendered here -->
+                    <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Vulnerable Locations</h5>
+            </div>
+            <div class="card-body">
+                <div id="locations-chart" style="height: 300px;">
+                    <!-- Chart will be rendered here -->
+                    <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Alerts and Top Rules -->
+<div class="row">
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Recent Alerts</h5>
+                <a href="{{ url_for('alerts.index') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover table-striped mb-0 alert-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Agent</th>
+                                <th>Rule ID</th>
+                                <th>Level</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-alerts-body">
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status" id="stats-loading">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-fire me-2"></i>Top Triggered Rules</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Rule ID</th>
+                                <th>Level</th>
+                                <th>Description</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-rules-body">
+                            <tr>
+                                <td colspan="4" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- System Settings Section -->
+{% if current_user.is_admin() %}
+<div class="row mt-4">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>System Configuration</h5>
+                <button type="button" class="btn btn-primary btn-sm" id="saveSystemConfig">
+                    <i class="fas fa-save me-2"></i>Save Changes
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Auto-Refresh Settings -->
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <h6 class="mb-3">Auto-Refresh Settings</h6>
+                            <div class="mb-3">
+                                <label for="dashboardRefreshInterval" class="form-label">Dashboard Refresh Interval</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="dashboardRefreshInterval" placeholder="60" min="10">
+                                    <span class="input-group-text">seconds</span>
+                                </div>
+                                <div class="form-text">How often the dashboard automatically refreshes data (minimum 10 seconds)</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="alertCheckInterval" class="form-label">Alert Check Interval</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="alertCheckInterval" placeholder="60" min="30">
+                                    <span class="input-group-text">minutes</span>
+                                </div>
+                                <div class="form-text">How often the system checks for new alerts (minimum 30 minutes)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Retention Settings -->
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <h6 class="mb-3">Data Management</h6>
+                            <p class="mb-3">Configure data retention policies to manage how long security data is stored in your systems.</p>
+                            <a href="{{ url_for('retention.index') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-database me-2"></i>Manage Data Retention
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<!-- Dashboard specific JavaScript -->
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+    // Initialize refresh button
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        console.log('Refresh button clicked');
+        // Get current active time range
+        const activeTimeRange = document.querySelector('.timeline-range.active');
+        const days = activeTimeRange ? activeTimeRange.getAttribute('data-days') : '1';
+        console.log('Refreshing with days:', days);
+        
+        // Refresh data with current time range
+        loadDashboardStatsForTimeRange(days);
+        loadAlertsTimeline(days);
+        loadTopRules(days);
+        loadThreatAnalysis();
+    });
+    
+    // System configuration handling
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load current configuration
+        fetch('/api/config/dashboard_refresh_interval')
+            .then(response => response.json())
+            .then(data => {
+                if (data.value) {
+                    document.getElementById('dashboardRefreshInterval').value = data.value;
+                }
+            })
+            .catch(error => console.error('Error loading dashboard refresh interval:', error));
+            
+        fetch('/api/config/alert_check_interval')
+            .then(response => response.json())
+            .then(data => {
+                if (data.value) {
+                    document.getElementById('alertCheckInterval').value = data.value;
+                }
+            })
+            .catch(error => console.error('Error loading alert check interval:', error));
+        
+        // Save configuration button (admin only)
+        const saveConfigButton = document.getElementById('saveSystemConfig');
+        if (saveConfigButton) {
+            saveConfigButton.addEventListener('click', function() {
+                const dashboardRefreshInterval = document.getElementById('dashboardRefreshInterval').value;
+                const alertCheckInterval = document.getElementById('alertCheckInterval').value;
+                
+                // Validate inputs
+                if (dashboardRefreshInterval < 10) {
+                    alert('Dashboard refresh interval must be at least 10 seconds.');
+                    return;
+                }
+                
+                if (alertCheckInterval < 30) {
+                    alert('Alert check interval must be at least 30 minutes.');
+                    return;
+                }
+                
+                // Prepare configuration updates
+                const configUpdates = [
+                    {
+                        key: 'dashboard_refresh_interval',
+                        value: dashboardRefreshInterval,
+                        description: 'Dashboard refresh interval in seconds'
+                    },
+                    {
+                        key: 'alert_check_interval',
+                        value: alertCheckInterval,
+                        description: 'Alert check interval in minutes'
+                    }
+                ];
+                
+                // Send updates to the server
+                fetch('/api/config/bulk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(configUpdates)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        // Show success message
+                        $('#success-message').text('System configuration saved successfully');
+                        $('#success-modal').modal('show');
+                    } else if (data.error) {
+                        // Show error message
+                        $('#error-message').text(data.error);
+                        $('#error-modal').modal('show');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving configuration:', error);
+                    $('#error-message').text('An error occurred while saving the configuration');
+                    $('#error-modal').modal('show');
+                });
+            });
+        }
+        
+        // Auto-refresh based on settings
+        function setupAutoRefresh() {
+            fetch('/api/config/dashboard_refresh_interval')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.value) {
+                        const refreshInterval = parseInt(data.value) * 1000; // Convert to milliseconds
+                        if (refreshInterval >= 10000) { // At least 10 seconds
+                            // Set up interval for auto-refresh
+                            setInterval(function() {
+                                console.log('Auto-refreshing dashboard data...');
+                                
+                                // Get current active time range
+                                const activeTimeRange = document.querySelector('.timeline-range.active');
+                                const days = activeTimeRange ? activeTimeRange.getAttribute('data-days') : '1';
+                                
+                                // Refresh data with current time range
+                                loadDashboardStatsForTimeRange(days);
+                                loadAlertsTimeline(days);
+                                loadTopRules(days);
+                                loadThreatAnalysis();
+                            }, refreshInterval);
+                        }
+                    }
+                })
+                .catch(error => console.error('Error setting up auto-refresh:', error));
+        }
+        
+        // Initialize auto-refresh
+        setupAutoRefresh();
+    });
+</script>
+{% endblock %}
